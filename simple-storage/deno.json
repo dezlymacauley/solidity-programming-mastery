@@ -1,0 +1,7 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@nomicfoundation/solidity-language-server": "npm:@nomicfoundation/solidity-language-server@0.8.25"
+  },
+  "allowScripts": ["npm:core-js@3.48.0"]
+}

@@ -35,13 +35,46 @@ Use this command to set a specific version of Foundry for your project.
 ```sh
 mise use foundry@1.5.1
 ```
+_______________________________________________________________________________
+
+Follow the same steps for `Deno`
+
+```sh
+mise ls-remote deno
+```
+
+```sh
+mise latest deno
+```
+
+```sh
+mise use deno@2.6.8
+```
+_______________________________________________________________________________
+
+Follow the same steps for `Node`
+
+```sh
+mise ls-remote node
+```
+
+```sh
+mise latest node
+```
+
+```sh
+mise use node@25.6.0
+```
+_______________________________________________________________________________
 
 This will create a `mise.toml` file at the root of the monorepo.
 
 mise.toml
 ```toml
 [tools]
+deno = "2.6.8"
 foundry = "1.5.1"
+node = "25.6.0"
 ```
 
 Note: The reason why I'm doing it this way is because 
@@ -238,6 +271,160 @@ the simplest thing to do is this:
 
 _______________________________________________________________________________
 
+### Add language support for Solidity in your project
+
+Add `deno.json` file to your project
+```sh
+touch deno.json
+```
+_______________________________________________________________________________
+
+Add this to the deno.json file
+```json
+{
+  "nodeModulesDir": "auto"
+}
+```
+
+By default `deno` does not use a `node_modules` directory, 
+so this will automatically create one when you try to add an npm package 
+to your project that needs a node_modules directory.
+
+_______________________________________________________________________________
+
+Check what is the latest version of the solidity language server from
+Nomic Foundation.
+```
+https://www.npmjs.com/package/@nomicfoundation/solidity-language-server
+```
+_______________________________________________________________________________
+
+Use `deno` to install the latest version of the solidity language 
+server from the Nomic Foundation.
+
+```sh
+deno add -D npm:@nomicfoundation/solidity-language-server@0.8.25
+```
+
+You will see a message like this:
+```
+Dependencies:
++ npm:@nomicfoundation/solidity-language-server 0.8.25
++ npm:vscode-langservers-extracted 4.10.0
+
+╭ Warning
+│
+│  Ignored build scripts for packages:
+│  npm:core-js@3.48.0
+│
+│  Run "deno approve-scripts" to run build scripts.
+╰─
+```
+
+1. Language support for Solidity was added
+2. Language support for html, css, and json was added as well.
+3. The post-install script `core-js`was blocked by Deno.
+
+_______________________________________________________________________________
+
+Unlike `npm` (the default package for Node.js), 
+`deno` (and alternative JavaScript and TypeScript runtime),
+blocks all post-install scripts unless you approve of those scripts.
+
+I use deno because it is a Rust tool like Foundry,
+and it focuses on security.
+
+core-js is a trusted and well-maintained in the JavaScript ecosystem 
+so you can approve it:
+```sh
+deno approve-scripts
+```
+_______________________________________________________________________________
+You will get a message like this:
+```
+? Select which packages to approve lifecycle scripts for (<space> to
+select, ↑/↓/j/k to navigate, a to select all, i to invert selection,
+enter to accept, <Ctrl-c> to cancel)
+❯ ○ npm:core-js@3.48.0
+```
+
+Press the space bar to select it, then press enter.
+
+You'll get this message.
+```sh
+Approved npm:core-js@3.48.0
+Ran build script npm:core-js@3.48.0
+```
+
+Note: Some post-install scripts and language servers assume that node.js 
+is installed in your environment or they will fail. 
+
+That's why I installed node.js in at the root of this monorepo.
+
+
+Your `deno.json` file in your project should look like this now.
+```sh
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@nomicfoundation/solidity-language-server": "npm:@nomicfoundation/solidity-language-server@^0.8.25"
+  },
+  "allowScripts": ["npm:core-js@3.48.0"]
+}
+```
+
+The `deno.json` file keeps a record of all the npm packages you install,
+and post-install scripts that you approved.
+
+_______________________________________________________________________________
+
+I also prefer to change this:
+
+`npm:@nomicfoundation/solidity-language-server@^0.8.25`
+
+to this so that the project is using an exact version of this lsp:
+
+`npm:@nomicfoundation/solidity-language-server@0.8.25`
+
+_______________________________________________________________________________
+
+You can run this command to check for any outdated npm packages
+in your project:
+```sh
+deno outdated
+```
+_______________________________________________________________________________
+
+You can check if any of the `npm` package in your project 
+have a known vulnerability.
+
+```sh
+npm audit
+```
+_______________________________________________________________________________
+
+You can update these packages using:
+```sh
+deno update --latest
+```
+_______________________________________________________________________________
+
+### Clear out the contents of the project `README.md` file
+
+```sh
+truncate -s 0 README.md
+```
+_______________________________________________________________________________
+
+### Add the `node_modules` directory to your `.gitignore` file
+
+Add this to the end of the file:
+```gitignore
+# npm dependencies
+/node_modules/
+```
+_______________________________________________________________________________
+
 ### Setup
 
 Clone this repo
@@ -264,6 +451,11 @@ git submodule update --init --recursive
 Then enter the project directory of the Solidity project you want:
 ```sh
 cd new-solidity-project
+```
+
+Install `npm` packages from the `deno.json` file
+```sh
+deno install
 ```
 
 Build the project
