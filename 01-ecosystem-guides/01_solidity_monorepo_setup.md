@@ -292,24 +292,26 @@ to your project that needs a node_modules directory.
 
 _______________________________________________________________________________
 
-Check what is the latest version of the solidity language server from
-Nomic Foundation.
+Check what is the latest version of the solc
+
+Solc is the Solidity compiler and also the native lsp
+
 ```
-https://www.npmjs.com/package/@nomicfoundation/solidity-language-server
+https://www.npmjs.com/package/solc
 ```
 _______________________________________________________________________________
 
-Use `deno` to install the latest version of the solidity language 
-server from the Nomic Foundation.
+Use `deno` to install the latest version of the language server as a
+development dependency.
 
 ```sh
-deno add -D npm:@nomicfoundation/solidity-language-server@0.8.25
+deno add -D npm:solc@0.8.33
 ```
 
 You will see a message like this:
 ```
 Dependencies:
-+ npm:@nomicfoundation/solidity-language-server 0.8.25
++ npm:solc 0.8.33
 + npm:vscode-langservers-extracted 4.10.0
 
 ╭ Warning
@@ -320,10 +322,9 @@ Dependencies:
 │  Run "deno approve-scripts" to run build scripts.
 ╰─
 ```
-
 1. Language support for Solidity was added
 2. Language support for html, css, and json was added as well.
-3. The post-install script `core-js`was blocked by Deno.
+3. The post-install script `core-js`, was blocked by Deno.
 
 _______________________________________________________________________________
 
@@ -334,24 +335,25 @@ blocks all post-install scripts unless you approve of those scripts.
 I use deno because it is a Rust tool like Foundry,
 and it focuses on security.
 
-core-js is a trusted and well-maintained in the JavaScript ecosystem 
-so you can approve it:
+_______________________________________________________________________________
+
+If you want to approve these scripts:
 ```sh
 deno approve-scripts
 ```
 _______________________________________________________________________________
+
 You will get a message like this:
 ```
+❯ deno approve-scripts
 ? Select which packages to approve lifecycle scripts for (<space> to
 select, ↑/↓/j/k to navigate, a to select all, i to invert selection,
 enter to accept, <Ctrl-c> to cancel)
 ❯ ○ npm:core-js@3.48.0
 ```
 
-Press the space bar to select it, then press enter.
-
-You'll get this message.
-```sh
+You will get a message like this:
+```
 Approved npm:core-js@3.48.0
 Ran build script npm:core-js@3.48.0
 ```
@@ -361,30 +363,21 @@ is installed in your environment or they will fail.
 
 That's why I installed node.js in at the root of this monorepo.
 
+_______________________________________________________________________________
 
 Your `deno.json` file in your project should look like this now.
-```sh
+```json
 {
   "nodeModulesDir": "auto",
   "imports": {
-    "@nomicfoundation/solidity-language-server": "npm:@nomicfoundation/solidity-language-server@^0.8.25"
+    "solc": "npm:solc@0.8.33"
   },
   "allowScripts": ["npm:core-js@3.48.0"]
 }
 ```
 
 The `deno.json` file keeps a record of all the npm packages you install,
-and post-install scripts that you approved.
-
-_______________________________________________________________________________
-
-I also prefer to change this:
-
-`npm:@nomicfoundation/solidity-language-server@^0.8.25`
-
-to this so that the project is using an exact version of this lsp:
-
-`npm:@nomicfoundation/solidity-language-server@0.8.25`
+and post-install scripts that you approved or denied.
 
 _______________________________________________________________________________
 
@@ -395,17 +388,17 @@ deno outdated
 ```
 _______________________________________________________________________________
 
+You can update these packages using:
+```sh
+deno update --latest
+```
+_______________________________________________________________________________
+
 You can check if any of the `npm` package in your project 
 have a known vulnerability.
 
 ```sh
-npm audit
-```
-_______________________________________________________________________________
-
-You can update these packages using:
-```sh
-deno update --latest
+deno audit
 ```
 _______________________________________________________________________________
 
